@@ -12,8 +12,8 @@ namespace BlockchainAssignment
         /* Block Variables */
         private DateTime timestamp; // Time of creation
 
-        private int index, // Position of the block in the sequence of blocks
-            difficulty = 2; // An arbitrary number of 0's to proceed a hash value
+        private int index = 2, // Position of the block in the sequence of blocks
+            private int difficulty = 2; // An arbitrary number of 0's to proceed a hash value
 
         public String prevHash, // A reference pointer to the previous block
             hash, // The current blocks "identity"
@@ -29,24 +29,28 @@ namespace BlockchainAssignment
         public double reward; // Simple fixed reward established by "Coinbase"
 
 
-        // New property to store the target block time (in seconds)
-        private int targetBlockTime = 60;
 
-        // New property to store the number of blocks to consider for adjusting difficulty
-        private int adjustmentInterval = 10;
+      
+
+        // New property to store the target block time (in seconds)
+        private double targetBlockTime = 5;
+        private int blocksPerAdjustment = 5;
+        double blockTime;
+
 
         // New method to adjust difficulty dynamically
         public void AdjustDifficulty(Block lastBlock)
         {
-            if(lastBlock != null && lastBlock.timestamp != null)
+            if (lastBlock != null )
             {
 
-                double blockTime = (timestamp - lastBlock.timestamp).TotalSeconds;
+                blockTime = (timestamp - lastBlock.timestamp).TotalSeconds;
+                Console.WriteLine("time: " + blockTime); //0.1890364
 
 
                 // Adjust difficulty based on the target block time
 
-                if(blockTime > targetBlockTime)
+                if (blockTime > targetBlockTime)
                 {
                     // Decrease difficulty 
 
@@ -175,19 +179,20 @@ namespace BlockchainAssignment
         {
             return "[BLOCK START]"
                 + "\nIndex: " + index
-                + "\tTimestamp: " + timestamp
-                + "\nPrevious Hash: " + prevHash
-                + "\n-- PoW --"
-                + "\nDifficulty Level: " + difficulty
-                + "\nNonce: " + nonce
+                //+ "\tTimestamp: " + timestamp
+                //+ "\nPrevious Hash: " + prevHash
+                //+ "\n-- PoW --"
+                + "\nDifficulty Level: " + difficulty 
+                + "\nBlock Time: " + blockTime 
+                //+ "\nNonce: " + nonce
                 + "\nHash: " + hash
-                + "\n-- Rewards --"
-                + "\nReward: " + reward
-                + "\nMiners Address: " + minerAddress
-                + "\n-- " + transactionList.Count + " Transactions --"
-                +"\nMerkle Root: " + merkleRoot
-                + "\n" + String.Join("\n", transactionList)
-                + "\n[BLOCK END]";
+                //+ "\n-- Rewards --"
+                //+ "\nReward: " + reward
+                //+ "\nMiners Address: " + minerAddress
+                //+ "\n-- " + transactionList.Count + " Transactions --"
+                //+"\nMerkle Root: " + merkleRoot
+                //+ "\n" + String.Join("\n", transactionList)
+                + "\n\n\n\n[BLOCK END]";
         }
     }
 }
