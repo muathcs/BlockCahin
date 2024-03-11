@@ -54,15 +54,15 @@ namespace BlockchainAssignment
         {
             return "  [TRANSACTION START]" 
                 + "\n  Timestamp: " + timestamp
-                //+ "\n  -- Verification --"
-                //+ "\n  Hash: " + hash
-                //+ "\n  Signature: " + signature
-                //+ "\n  -- Quantities --"
+                + "\n  -- Verification --"
+                + "\n  Hash: " + hash
+                + "\n  Signature: " + signature
+                + "\n  -- Quantities --"
                 + "\n  Transferred: " + amount + " Assignment Coin"
                 + "\t  Fee: " + fee
-                //+ "\n  -- Participants --"
-                //+ "\n  Sender: " + senderAddress
-                //+ "\n  Reciever: " + recipientAddress 
+                + "\n  -- Participants --"
+                + "\n  Sender: " + senderAddress
+                + "\n  Reciever: " + recipientAddress 
                 + "\n  [TRANSACTION END]\n\n";
         }
     }

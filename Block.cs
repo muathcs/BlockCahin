@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
+using System.Threading;
 
 namespace BlockchainAssignment
 {
@@ -27,14 +29,24 @@ namespace BlockchainAssignment
         // Rewards
         public double reward; // Simple fixed reward established by "Coinbase"
 
+        public TimeSpan totalTimeToMine;
 
 
-      
+        private static SemaphoreSlim semaphore = new SemaphoreSlim(1, 1);
+
+        // Shared result variables
+        private static bool matchFound = false;
+        private static string matchingHash;
+        private static long matchingNonce;
+
+
+
+
 
         // New property to store the target block time (in seconds)
         private double targetBlockTime = 5;
         double blockTime;
-        private static int difficulty; // An arbitrary number of 0's to proceed a hash value
+        private static int difficulty = 5; // An arbitrary number of 0's to proceed a hash value
         // New method to adjust difficulty dynamically
         public void AdjustDifficulty(Block lastBlock)
         {
@@ -63,7 +75,7 @@ namespace BlockchainAssignment
             timestamp = DateTime.Now;
             index = 0;
             transactionList = new List<Transaction>();
-            hash = Mine();
+            hash = MineWithMultipleThreads();
         }
 
         /* New Block constructor */
@@ -102,7 +114,93 @@ namespace BlockchainAssignment
             AdjustDifficulty(lastBlock);
 
             merkleRoot = MerkleRoot(transactionList); // Calculate the merkle root of the blocks transactions
-            hash = Mine(); // Conduct PoW to create a hash which meets the given difficulty requirement
+            hash = MineWithMultipleThreads(); // Conduct PoW to create a hash which meets the given difficulty requirement
+        }
+
+        // Method for parallelized Proof-of-Work
+        public string MineWithMultipleThreads()
+        {
+            int numberOfThreads = Environment.ProcessorCount; // Use the number of available cores
+            Task<string>[] mineTasks = new Task<string>[numberOfThreads];
+            
+            
+            
+            Stopwatch stopwatch = new Stopwatch();
+            stopwatch.Start();
+
+
+            for (int i = 0; i < numberOfThreads; i++)
+            {
+                int threadIndex = i; // Capture the variable to avoid closure issues
+
+                mineTasks[i] = Task.Run(() =>
+                {
+                    return MineWithThreadIndex(threadIndex);
+                });
+            }
+
+            stopwatch.Stop();
+
+            // Get the elapsed time
+            totalTimeToMine = stopwatch.Elapsed;
+
+            // Wait for any task to complete
+            int completedTaskIndex = Task.WaitAny(mineTasks);
+
+            // Signal other tasks to stop
+            matchFound = true;
+
+            // Retrieve the result from the completed task
+            string resultHash = mineTasks[completedTaskIndex].Result;
+
+            // Update the block properties with the matching result
+            hash = resultHash;
+            nonce = matchingNonce;
+
+            return resultHash;
+        }
+
+        // Method for each thread to perform Proof-of-Work with a specific index
+        private string MineWithThreadIndex(int threadIndex)
+        {
+            long startNonce = threadIndex;
+            long step = Environment.ProcessorCount;
+
+
+            //    Stopwatch stopwatch = new Stopwatch();
+            //stopwatch.Start();
+
+            while (!matchFound)
+            {
+                string hash = CreateHash(startNonce);
+                if (hash.StartsWith(new string('0', difficulty)))
+                {
+                    // If a match is found, acquire semaphore and update shared variables
+                    semaphore.Wait();
+                    if (!matchFound)
+                    {
+                        matchFound = true;
+                        matchingHash = hash;
+                        matchingNonce = startNonce;
+                    }
+                    semaphore.Release();
+
+                    return hash;
+                }
+
+                startNonce += step;
+            }
+
+            // Stop the stopwatch
+            //stopwatch.Stop();
+
+            //// Get the elapsed time
+            //totalTimeToMine = stopwatch.Elapsed;
+
+            // Print the total elapsed time
+            //Console.WriteLine($"Total time taken: {temestamp}");
+
+            return null; // Not reached
         }
 
         /* Hashes the entire Block object */
@@ -132,14 +230,56 @@ namespace BlockchainAssignment
 
             String re = new string('0', difficulty); // A string for analysing the PoW requirement
 
-            while(!hash.StartsWith(re)) // Check the resultant hash against the "re" string
+            Stopwatch stopwatch = new Stopwatch();
+            stopwatch.Start();
+
+            while (!hash.StartsWith(re)) // Check the resultant hash against the "re" string
             {
                 nonce++; // Increment the nonce should the difficulty level not be satisfied
                 hash = CreateHash(); // Rehash with the new nonce as to generate a different hash
             }
 
+            // Stop the stopwatch
+            stopwatch.Stop();
+
+            // Get the elapsed time
+            totalTimeToMine = stopwatch.Elapsed;
+
+            // Print the total elapsed time
+            //Console.WriteLine($"Total time taken: {temestamp}");
+           
+
+
+
+
             return hash; // Return the hash meeting the difficulty requirement
         }
+
+        
+
+
+
+
+
+        //    return hash; // Return the hash meeting the difficulty requirement
+        //}
+
+        // overloading creatHash function to take in a nonce, this is for the multithreading mine(). 
+        public String CreateHash(long thNone)
+        {
+            String hash = String.Empty;
+            SHA256 hasher = SHA256Managed.Create();
+
+            String input = timestamp.ToString() + index + prevHash + thNone + merkleRoot;
+
+            Byte[] hashByte = hasher.ComputeHash(Encoding.UTF8.GetBytes(input));
+
+            foreach (byte x in hashByte)
+                hash += String.Format("{0:x2}", x);
+
+            return hash;
+        }
+
 
         // Merkle Root Algorithm - Encodes transactions within a block into a single hash
         public static String MerkleRoot(List<Transaction> transactionList)
@@ -211,6 +351,7 @@ namespace BlockchainAssignment
                 + "\nHash: " + hash
                 + "\n-- Rewards --"
                 + "\nReward: " + reward
+                + "\nTime To Mine: " + totalTimeToMine.TotalMilliseconds + " ms"
                 + "\nMiners Address: " + minerAddress
                 + "\n-- " + transactionList.Count + " Transactions --"
                 + "\nMerkle Root: " + merkleRoot

@@ -1,7 +1,8 @@
 {
   "ExpandedNodes": [
-    ""
+    "",
+    "\\Wallet"
   ],
-  "SelectedNode": "\\Block.cs",
+  "SelectedNode": "\\BlockchainApp.cs",
   "PreviewInSolutionExplorer": false
 }

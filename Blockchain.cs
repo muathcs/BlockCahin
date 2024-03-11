@@ -12,10 +12,13 @@ namespace BlockchainAssignment
         public List<Block> blocks;
 
         // Maximum number of transactions per block
-        private int transactionsPerBlock = 6;
+        private int transactionsPerBlock = 11116;
 
         // List of pending transactions to be mined
          public List<Transaction> transactionPool = new List<Transaction>();
+
+        private List<StakingParticipant> stakingParticipants = new List<StakingParticipant>();
+
 
         // Default Constructor - initialises the list of blocks and generates the genesis block
         public Blockchain()
@@ -37,10 +40,64 @@ namespace BlockchainAssignment
         }
 
 
-      
+        // Proof of Stake block creation
+        public void CreateProofOfStakeBlock(string minerAddress)
+        {
+            // Check if the miner is a valid participant
+            StakingParticipant miner = stakingParticipants.FirstOrDefault(p => p.Address == minerAddress);
 
-        // Retrieves the most recently appended block in the blockchain
-        public Block GetLastBlock()
+            if (miner != null && miner.Stake >= 1) // Assuming 1 as the minimum stake required
+            {
+                Console.WriteLine($"Proof of Stake: Miner {miner.Address} with stake {miner.Stake} creates a new block.");
+
+                // Get pending transactions and remove from the pool
+                List<Transaction> transactions = GetPendingTransactions();
+
+                // Create a new block with Proof of Stake
+                Block newBlock = new Block(GetLastBlock(), transactions, minerAddress, "default");
+                blocks.Add(newBlock);
+            }
+            else
+            {
+                Console.WriteLine("Proof of Stake: Invalid miner or insufficient stake to create a block.");
+            }
+        }
+
+        // Add a participant to the Proof of Stake system
+        public void AddStakingParticipant(StakingParticipant participant)
+        {
+            stakingParticipants.Add(participant);
+        }
+
+        // Print the list of staking participants
+        public void PrintStakingParticipants()
+        {
+            Console.WriteLine("Staking Participants:");
+            foreach (var participant in stakingParticipants)
+            {
+                Console.WriteLine($"{participant.Address} - Stake: {participant.Stake}");
+            }
+        }
+    
+
+    // Staking participant class
+    public class StakingParticipant
+    {
+        public string Address { get; private set; }
+        public double Stake { get; private set; }
+
+        public StakingParticipant(string address, double initialStake)
+        {
+            Address = address;
+            Stake = initialStake;
+        }
+    }
+
+
+
+
+    // Retrieves the most recently appended block in the blockchain
+    public Block GetLastBlock()
         {
             return blocks[blocks.Count - 1];
         }
