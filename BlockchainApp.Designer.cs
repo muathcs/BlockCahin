@@ -30,6 +30,9 @@
         {
             this.output = new System.Windows.Forms.RichTextBox();
             this.printBlock = new System.Windows.Forms.Button();
+            this.greedy = new System.Windows.Forms.Button();
+            this.random = new System.Windows.Forms.Button();
+            this.altruistic = new System.Windows.Forms.Button();    
             this.blockNo = new System.Windows.Forms.TextBox();
             this.generateWallet = new System.Windows.Forms.Button();
             this.publicKeyLabel = new System.Windows.Forms.Label();
@@ -53,6 +56,8 @@
             this.transactionLabel = new System.Windows.Forms.Label();
             this.blocksLabel = new System.Windows.Forms.Label();
             this.validationLabel = new System.Windows.Forms.Label();
+            this.transactionSelectionComboBox = new System.Windows.Forms.ComboBox();
+
             this.SuspendLayout();
             // 
             // output
@@ -65,10 +70,55 @@
             this.output.Size = new System.Drawing.Size(688, 341);
             this.output.TabIndex = 0;
             this.output.Text = "";
+
+
+            // Greedy
+            this.greedy.Location = new System.Drawing.Point(10, 95);
+            this.greedy.Name = "greedy";
+            this.greedy.Size = new System.Drawing.Size(99, 39);
+            this.greedy.TabIndex = 1;
+            this.greedy.Text = "greedy";
+            this.greedy.UseVisualStyleBackColor = true;
+            this.greedy.Click += new System.EventHandler(this.PrintGreedy_Click);
+            this.greedy.Visible = false;
+
+
+            //selector
+
+            this.transactionSelectionComboBox.Location = new System.Drawing.Point(716, 95);
+            this.transactionSelectionComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.transactionSelectionComboBox.FormattingEnabled = true;
+            this.transactionSelectionComboBox.Items.AddRange(new object[] { "greedy", "altruistic", "random" });
+            this.transactionSelectionComboBox.Name = "transactionSelectionComboBox";
+            this.transactionSelectionComboBox.Size = new System.Drawing.Size(121, 28);
+            this.transactionSelectionComboBox.TabIndex = 26;
+            this.transactionSelectionComboBox.SelectedIndex = 0; // Set the default selection
+            
+
+            // Random
+            this.random.Location = new System.Drawing.Point(10, 95);
+            this.random.Name = "random";
+            this.random.Size = new System.Drawing.Size(99, 39);
+            this.random.TabIndex = 1;
+            this.random.Text = "random";
+            this.random.UseVisualStyleBackColor = true;
+            this.random.Click += new System.EventHandler(this.PrintRandom_Click);
+            this.random.Visible = false;
+
+            //Altruistic
+            this.altruistic.Location = new System.Drawing.Point(10, 95);
+            this.altruistic.Name = "altruistic";
+            this.altruistic.Size = new System.Drawing.Size(99, 39);
+            this.altruistic.TabIndex = 1;
+            this.altruistic.Text = "Altruistic";
+            this.altruistic.UseVisualStyleBackColor = true;
+            this.altruistic.Click += new System.EventHandler(this.PrintBlock_Click);
+            this.altruistic.Visible = false;
+
             // 
             // printBlock
             // 
-            this.printBlock.Location = new System.Drawing.Point(716, 99);
+            this.printBlock.Location = new System.Drawing.Point(716, 130);
             this.printBlock.Name = "printBlock";
             this.printBlock.Size = new System.Drawing.Size(99, 39);
             this.printBlock.TabIndex = 1;
@@ -78,7 +128,7 @@
             // 
             // blockNo
             // 
-            this.blockNo.Location = new System.Drawing.Point(821, 105);
+            this.blockNo.Location = new System.Drawing.Point(821, 132);
             this.blockNo.Name = "blockNo";
             this.blockNo.Size = new System.Drawing.Size(34, 26);
             this.blockNo.TabIndex = 2;
@@ -205,7 +255,7 @@
             // 
             // printBlockchain
             // 
-            this.printBlockchain.Location = new System.Drawing.Point(862, 99);
+            this.printBlockchain.Location = new System.Drawing.Point(862, 130);
             this.printBlockchain.Name = "printBlockchain";
             this.printBlockchain.Size = new System.Drawing.Size(148, 39);
             this.printBlockchain.TabIndex = 17;
@@ -289,6 +339,9 @@
             this.Controls.Add(this.blocksLabel);
             this.Controls.Add(this.transactionLabel);
             this.Controls.Add(this.currentWalletLabel);
+            this.Controls.Add(this.greedy);
+            this.Controls.Add(this.altruistic);
+            this.Controls.Add(this.random);
             this.Controls.Add(this.checkBalance);
             this.Controls.Add(this.validate);
             this.Controls.Add(this.readPendingTransactions);
@@ -310,6 +363,7 @@
             this.Controls.Add(this.blockNo);
             this.Controls.Add(this.printBlock);
             this.Controls.Add(this.output);
+            this.Controls.Add(this.transactionSelectionComboBox);
             this.ForeColor = System.Drawing.Color.Black;
             this.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.Name = "BlockchainApp";
@@ -343,9 +397,13 @@
         private System.Windows.Forms.Button validate;
         private System.Windows.Forms.Button checkBalance;
         private System.Windows.Forms.Label currentWalletLabel;
+        private System.Windows.Forms.Button greedy;
+        private System.Windows.Forms.Button altruistic; 
+        private System.Windows.Forms.Button random;
         private System.Windows.Forms.Label transactionLabel;
         private System.Windows.Forms.Label blocksLabel;
         private System.Windows.Forms.Label validationLabel;
+        private System.Windows.Forms.ComboBox transactionSelectionComboBox;
     }
 }
 

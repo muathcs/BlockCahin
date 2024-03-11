@@ -12,8 +12,7 @@ namespace BlockchainAssignment
         /* Block Variables */
         private DateTime timestamp; // Time of creation
 
-        private int index = 2, // Position of the block in the sequence of blocks
-            private int difficulty = 2; // An arbitrary number of 0's to proceed a hash value
+        private int index = 2; // Position of the block in the sequence of blocks
 
         public String prevHash, // A reference pointer to the previous block
             hash, // The current blocks "identity"
@@ -34,35 +33,25 @@ namespace BlockchainAssignment
 
         // New property to store the target block time (in seconds)
         private double targetBlockTime = 5;
-        private int blocksPerAdjustment = 5;
         double blockTime;
-
-
+        private static int difficulty; // An arbitrary number of 0's to proceed a hash value
         // New method to adjust difficulty dynamically
         public void AdjustDifficulty(Block lastBlock)
         {
             if (lastBlock != null )
             {
-
                 blockTime = (timestamp - lastBlock.timestamp).TotalSeconds;
-                Console.WriteLine("time: " + blockTime); //0.1890364
-
 
                 // Adjust difficulty based on the target block time
-
                 if (blockTime > targetBlockTime)
                 {
-                    // Decrease difficulty 
-
-                    difficulty--;
-
+                    difficulty-=1; //decrease difficulty 
                 }
                 else if(blockTime < targetBlockTime)
                 {
-                    //Increase difficulty 
-                    difficulty++;
+                     
+                    difficulty+= 1;//Increase difficulty
                 }
-
                 // Ensure difficulty doesn't go below 1
                 difficulty = Math.Max(1, difficulty);
             }
@@ -78,17 +67,36 @@ namespace BlockchainAssignment
         }
 
         /* New Block constructor */
-        public Block(Block lastBlock, List<Transaction> transactions, String minerAddress)
+        public Block(Block lastBlock, List<Transaction> transactions, String minerAddress, string transactionSelectionStrategy = "default")
         {
             timestamp = DateTime.Now;
 
             index = lastBlock.index + 1;
             prevHash = hash;
 
+
+
+            // Apply transaction selection strategy
+            if (transactionSelectionStrategy == "greedy")
+            {
+                transactions = transactions.OrderByDescending(t => t.fee).ToList();
+            }
+            else if (transactionSelectionStrategy == "altruistic")
+            {
+                transactions = transactions.OrderBy(t => t.timestamp).ToList();
+            }
+            else if (transactionSelectionStrategy == "random")
+            {
+                Random random = new Random();
+                transactions = transactions.OrderBy(t => random.Next()).ToList();
+            }
+
+
             this.minerAddress = minerAddress; // The wallet to be credited the reward for the mining effort
             reward = 1.0; // Assign a simple fixed value reward
             transactions.Add(createRewardTransaction(transactions)); // Create and append the reward transaction
             transactionList = new List<Transaction>(transactions); // Assign provided transactions to the block
+
 
             //adjust difficulty dynamically
             AdjustDifficulty(lastBlock);
@@ -175,23 +183,38 @@ namespace BlockchainAssignment
         }
 
         /* Concatenate all properties to output to the UI */
-        public override string ToString()
+        public string ToString(string strategy = "default")
+
+
         {
+
+
+
+            if (strategy == "greedy")
+            {
+                transactionList = transactionList.OrderByDescending(t => t.fee).ToList();
+
+            }else if (strategy == "random")
+            {
+                // Use OrderBy with a random order to shuffle the transactionList
+                Random random = new Random();
+                transactionList = transactionList.OrderBy(t => random.Next()).ToList();
+            }
             return "[BLOCK START]"
                 + "\nIndex: " + index
-                //+ "\tTimestamp: " + timestamp
-                //+ "\nPrevious Hash: " + prevHash
-                //+ "\n-- PoW --"
+                + "\tTimestamp: " + timestamp
+                + "\nPrevious Hash: " + prevHash
+                + "\n-- PoW --"
                 + "\nDifficulty Level: " + difficulty 
                 + "\nBlock Time: " + blockTime 
-                //+ "\nNonce: " + nonce
+                + "\nNonce: " + nonce
                 + "\nHash: " + hash
-                //+ "\n-- Rewards --"
-                //+ "\nReward: " + reward
-                //+ "\nMiners Address: " + minerAddress
-                //+ "\n-- " + transactionList.Count + " Transactions --"
-                //+"\nMerkle Root: " + merkleRoot
-                //+ "\n" + String.Join("\n", transactionList)
+                + "\n-- Rewards --"
+                + "\nReward: " + reward
+                + "\nMiners Address: " + minerAddress
+                + "\n-- " + transactionList.Count + " Transactions --"
+                + "\nMerkle Root: " + merkleRoot
+                + "\n" + String.Join("\n", transactionList)
                 + "\n\n\n\n[BLOCK END]";
         }
     }

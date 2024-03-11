@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Windows.Forms;
 
 namespace BlockchainAssignment
@@ -42,6 +43,44 @@ namespace BlockchainAssignment
                 UpdateText("Invalid Block No.");
         }
 
+        // greedy 
+
+        private void PrintGreedy_Click(object sender, EventArgs e)
+        {
+            //blockchain.GreedyTransactionSelection();
+            
+
+              if (Int32.TryParse(blockNo.Text, out int index))
+                UpdateText(blockchain.GetBlockAsString(index, "greedy"));
+            else
+                UpdateText("Invalid Block No.");
+
+        }
+
+        // random 
+
+        private void PrintRandom_Click(object sender, EventArgs e)
+        {
+
+
+            if (Int32.TryParse(blockNo.Text, out int index))
+                UpdateText(blockchain.GetBlockAsString(index, "random"));
+            else
+                UpdateText("Invalid Block No.");
+
+        }
+
+        //private void PrintGreedy_Click(object sender, EventArgs e)
+        //{
+        //    blockchain.GreedyTransactionSelection();
+
+
+        //    if (Int32.TryParse(blockNo.Text, out int index))
+        //        UpdateText(blockchain.GetBlockAsString(index,"random"));
+        //    else
+        //        UpdateText("Invalid Block No.");
+
+        //}
         // Print pending transactions from the transaction pool to the UI
         private void PrintPendingTransactions_Click(object sender, EventArgs e)
         {
@@ -81,6 +120,7 @@ namespace BlockchainAssignment
             Transaction transaction = new Transaction(publicKey.Text, reciever.Text, Double.Parse(amount.Text), Double.Parse(fee.Text), privateKey.Text);
             /* TODO: Validate transaction */
             blockchain.transactionPool.Add(transaction);
+            //blockchain.GreedyTransactionSelection();
             UpdateText(transaction.ToString());
         }
 
@@ -91,8 +131,10 @@ namespace BlockchainAssignment
             // Retrieve pending transactions to be added to the newly generated Block
             List<Transaction> transactions = blockchain.GetPendingTransactions();
 
+            string selectedStrategy = transactionSelectionComboBox.SelectedItem.ToString(); 
+
             // Create and append the new block - requires a reference to the previous block, a set of transactions and the miners public address (For the reward to be issued)
-            Block newBlock = new Block(blockchain.GetLastBlock(), transactions, publicKey.Text);
+            Block newBlock = new Block(blockchain.GetLastBlock(), transactions, publicKey.Text, selectedStrategy);
             blockchain.blocks.Add(newBlock);
 
             UpdateText(blockchain.ToString());

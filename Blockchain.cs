@@ -12,10 +12,10 @@ namespace BlockchainAssignment
         public List<Block> blocks;
 
         // Maximum number of transactions per block
-        private int transactionsPerBlock = 5;
+        private int transactionsPerBlock = 6;
 
         // List of pending transactions to be mined
-        public List<Transaction> transactionPool = new List<Transaction>();
+         public List<Transaction> transactionPool = new List<Transaction>();
 
         // Default Constructor - initialises the list of blocks and generates the genesis block
         public Blockchain()
@@ -27,14 +27,17 @@ namespace BlockchainAssignment
         }
 
         // Prints the block at the specified index to the UI
-        public String GetBlockAsString(int index)
+        public String GetBlockAsString(int index, string method = "default")
         {
             // Check if referenced block exists
             if (index >= 0 && index < blocks.Count)
-                return blocks[index].ToString(); // Return block as a string
+                return blocks[index].ToString(method); // Return block as a string
             else
                 return "No such block exists";
         }
+
+
+      
 
         // Retrieves the most recently appended block in the blockchain
         public Block GetLastBlock()
@@ -54,6 +57,15 @@ namespace BlockchainAssignment
 
             // Return the extracted transactions
             return transactions;
+        }
+
+        // 
+        // Greedy selection, get highest fee first
+        public void GreedyTransactionSelection()
+        {
+            transactionPool = transactionPool.OrderByDescending(t => t.fee).ToList();
+
+
         }
 
         // Check validity of a blocks hash by recomputing the hash and comparing with the mined value
